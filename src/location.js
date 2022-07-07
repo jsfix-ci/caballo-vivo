@@ -17,7 +17,10 @@ import {
   tap,
 } from 'rxjs/operators'
 
-export const history = createBrowserHistory({
+export const history = /* TODO: JSFIX could not patch the breaking change:
+Removed getUserConfirmation 
+Suggested fix: You can no longer use the getUserConfirmation property to set the default message for the history to display. Instead we recommend using either window.confirmation (https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm) or something similar. See an example of how to use `window.confirmation` here: https://github.com/remix-run/history/blob/105b64a99359c4a438abbc8e6735fa277b5640f5/docs/Blocking.md#blocking-transitions */
+createBrowserHistory({
   getUserConfirmation: () => false,
   basename:
     process.env.REACT_APP_ROUTER_BASE_URL || process.env.PUBLIC_URL || '',
@@ -26,7 +29,10 @@ export const history = createBrowserHistory({
 let programmaticNavigationTokens = Set()
 let currentAction
 
-followLink$.subscribe(location => history.push(location))
+followLink$.subscribe(location => /* TODO: JSFIX could not patch the breaking change:
+Removed relative pathname support in hash history and memory history 
+Suggested fix: Relative paths are no longer supportet by the hash/memory history, hence we recommend using the entire path name instead. */
+history.push(location))
 jumpBack$.subscribe(() => history.goBack())
 
 const startLocation$ = of(history.location).pipe(
@@ -80,8 +86,14 @@ export function createNavigateTo$(
     tap(location => {
       if (action === undefined) action = currentAction
       if (!action || action === 'PUSH') {
+        /* TODO: JSFIX could not patch the breaking change:
+        Removed relative pathname support in hash history and memory history 
+        Suggested fix: Relative paths are no longer supportet by the hash/memory history, hence we recommend using the entire path name instead. */
         history.push(location)
       } else {
+        /* TODO: JSFIX could not patch the breaking change:
+        Removed relative pathname support in hash history and memory history 
+        Suggested fix: Relative paths are no longer supportet by the hash/memory history, hence we recommend using the entire path name instead. */
         history.replace(location)
       }
     }),
@@ -107,7 +119,10 @@ export const anchorLocation$ = followAnchor$.pipe(
         .updateIn(['state', 'navToken'], () => navToken)
     ).pipe(
       tap(log('New location from anchor navigation')),
-      tap(location => history.push(location.toJS())),
+      tap(location => /* TODO: JSFIX could not patch the breaking change:
+      Removed relative pathname support in hash history and memory history 
+      Suggested fix: Relative paths are no longer supportet by the hash/memory history, hence we recommend using the entire path name instead. */
+      history.push(location.toJS())),
       tap(() => programmaticNavigationTokens.delete(navToken)),
       skip()
     )
@@ -132,7 +147,12 @@ function createLocationHandler$(pathToIntent) {
   }
 
   function handlerForManagedPaths(observer) {
-    return history.block(blockManagedPaths(observer, pathToIntent))
+    return (
+      /* TODO: JSFIX could not patch the breaking change:
+      Removed relative pathname support in hash history and memory history 
+      Suggested fix: Relative paths are no longer supportet by the hash/memory history, hence we recommend using the entire path name instead. */
+      history.block(blockManagedPaths(observer, pathToIntent))
+    )
   }
 }
 
